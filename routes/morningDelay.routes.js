@@ -1,0 +1,24 @@
+import express from 'express';
+import { addMorningDelay, getAllMorningDelays, getMorningDelaysByEmployee, getMorningDelaysByManager, validateMorningDelay, } from '../controllers/morningDelay.controller.js';
+
+const router = express.Router();
+
+router.post('/morning-delay/add', addMorningDelay);
+
+
+
+router.get('/morning-delays/manager/:manager_rw', getMorningDelaysByManager);
+
+
+router.get('/morning-delays/employee/:employee_rw', getMorningDelaysByEmployee);
+router.put('/morning-delays/validate/:id', validateMorningDelay);
+
+
+router.get('/morning-delays', getAllMorningDelays);
+
+
+
+
+
+
+export default router;
