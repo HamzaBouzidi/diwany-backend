@@ -1,7 +1,6 @@
 import { Sequelize, DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-
 const Cin = sequelize.define(
  'cin',
  {
@@ -15,7 +14,6 @@ const Cin = sequelize.define(
    type: DataTypes.TEXT,
    allowNull: true,
   },
-
   user_num: {
    type: DataTypes.TEXT,
    allowNull: true,
@@ -28,17 +26,15 @@ const Cin = sequelize.define(
    type: DataTypes.TEXT,
    allowNull: true,
   },
-
   user_ref_emp: {
    type: DataTypes.TEXT,
    allowNull: true,
   },
   state: {
-   type: DataTypes.BOOLEAN,
-   defaultValue: false,
+   type: DataTypes.ENUM('Pending', 'Approved', 'Rejected'), // Enum for specific states
+   defaultValue: 'Pending', // Default value is 'Pending'
    allowNull: false,
   },
-
  },
  {
   freezeTableName: true, // Prevent Sequelize from pluralizing table names

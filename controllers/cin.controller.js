@@ -1,38 +1,25 @@
-import Cin from '../models/cin.js';  // Ensure this is the correct path to the Cin model
+import Cin from '../models/cin.js';  
 
-// Function to add a new CIN entry
 export const addCin = async (req, res) => {
- const {
-  user_name,
-  user_num,
-  user_natio_num,
-  user_sifa,
-  user_ref_emp,
-  state  // Optional if the state can be controlled by the request
- } = req.body;
+ const { user_name, user_num, user_natio_num, user_sifa, user_ref_emp } = req.body;
 
  try {
-  // Validate that required fields are present
   if (!user_name || !user_num || !user_natio_num || !user_sifa || !user_ref_emp) {
    return res.status(400).json({ message: 'All required fields must be filled' });
   }
 
-  // Create a new CIN entry
   const newCin = await Cin.create({
    user_name,
    user_num,
    user_natio_num,
    user_sifa,
    user_ref_emp,
-   state: state || false  // Default to false if state is not provided
   });
 
-  // Respond with the newly created CIN entry
   return res.status(201).json({
    message: 'CIN entry created successfully',
-   cin: newCin
+   cin: newCin,
   });
-
  } catch (error) {
   console.error('Error creating CIN entry:', error);
   return res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -76,14 +63,49 @@ export const createCin = async (req, res) => {
 
 
 // Update a CIN
-export const updateCin = async (req, res) => {
+export const updateCinState = async (req, res) => {
+ const { CIN_ID } = req.params; // CIN ID from the URL
+ const { state } = req.body;   // New state from the request body
+
  try {
-  const cin = await Cin.findByPk(req.params.id);
-  if (!cin) return res.status(404).json({ message: 'CIN not found' });
-  await cin.update(req.body);
-  res.status(200).json(cin);
+  // Validate that required parameters are present
+  if (!CIN_ID || !state) {
+   return res.status(400).json({
+    message: 'CIN ID and state are required.',
+   });
+  }
+
+  // Validate the state value
+  const validStates = ['Approved', 'Rejected', 'Pending'];
+  if (!validStates.includes(state)) {
+   return res.status(400).json({
+    message: `Invalid state. State must be one of: ${validStates.join(', ')}`,
+   });
+  }
+
+  // Find the CIN entry by its ID
+  const cinEntry = await Cin.findByPk(CIN_ID);
+
+  if (!cinEntry) {
+   return res.status(404).json({
+    message: 'CIN entry not found.',
+   });
+  }
+
+  // Update the state of the CIN entry
+  cinEntry.state = state;
+  await cinEntry.save();
+
+  return res.status(200).json({
+   message: `CIN entry state updated to ${state}.`,
+   cin: cinEntry,
+  });
  } catch (error) {
-  res.status(500).json({ message: 'Error updating CIN', error });
+  console.error('Error updating CIN state:', error);
+  return res.status(500).json({
+   message: 'Internal server error.',
+   error: error.message,
+  });
  }
 };
 
