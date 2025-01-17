@@ -271,10 +271,6 @@ export const getUserInfo = async (req, res) => {
 };
 
 
-
-
-
-
 export const getDistinctCountAgeALLEmployee = async (req, res) => {
 
     try {
@@ -474,3 +470,303 @@ export const get_linked_department = async (req, res) => {
     }
 };
 
+
+
+export const getAllDepartments = async (req, res) => {
+    try {
+        // Fetch data from the API
+        const apiUrl = 'https://ejaz.dewani.ly/ejaz/api/employees';
+        const response = await axios.get(apiUrl, {
+            headers: {
+                'apikey': apiKey,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+
+        // Extract data from the API response
+        const employees = response.data;
+
+        // Get unique departments (d field)
+        const departments = [...new Set(employees.map(employee => employee.d))];
+
+        // Return the unique departments
+        res.status(200).json({
+            success: true,
+            departments,
+        });
+    } catch (error) {
+        console.error('Error fetching departments:', error);
+
+        // Handle errors
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch departments',
+            error: error.message,
+        });
+    }
+};
+
+export const getDirectorsByDepartment = async (req, res) => {
+    try {
+        // Fetch data from the API
+        const apiUrl = 'https://ejaz.dewani.ly/ejaz/api/employees';
+        const response = await axios.get(apiUrl, {
+            headers: {
+                'apikey': apiKey,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+        // Extract data from the API response
+        const employees = response.data;
+
+        // Filter employees with roles containing "مدير"
+        const directors = employees.filter(employee => employee.b.includes('مدير'));
+
+        // Group directors by department (d field)
+        const directorsByDepartment = directors.reduce((acc, employee) => {
+            if (!acc[employee.d]) {
+                acc[employee.d] = [];
+            }
+            acc[employee.d].push({
+                rw: employee.rw,
+                name: employee.nm,
+                role: employee.b,
+                department: employee.d,
+            });
+            return acc;
+        }, {});
+
+        // Return the grouped directors
+        res.status(200).json({
+            success: true,
+            directorsByDepartment,
+        });
+    } catch (error) {
+        console.error('Error fetching directors:', error);
+
+        // Handle errors
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch directors',
+            error: error.message,
+        });
+    }
+};
+
+
+
+export const getDepartmentByEmployeeName = async (req, res) => {
+    try {
+        // Extract the employee name from the query parameters
+        const { name } = req.query;
+
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: 'Employee name is required',
+            });
+        }
+
+        // Fetch data from the API
+        const apiUrl = 'https://ejaz.dewani.ly/ejaz/api/employees';
+        const response = await axios.get(apiUrl, {
+            headers: {
+                'apikey': apiKey,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+        // Extract data from the API response
+        const employees = response.data;
+
+        // Find the employee by name
+        const employee = employees.find(emp => emp.nm === name);
+
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: `No employee found with name: ${name}`,
+            });
+        }
+
+        // Return the department
+        res.status(200).json({
+            success: true,
+            department: employee.d,
+        });
+    } catch (error) {
+        console.error('Error fetching department by employee name:', error);
+
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch department',
+            error: error.message,
+        });
+    }
+};
+
+export const getDirectorDepartmentByName = async (req, res) => {
+    try {
+        // Extract the director name from the query parameters
+        const { name } = req.query;
+
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: 'Director name is required',
+            });
+        }
+
+        // Fetch data from the API
+        const apiUrl = 'https://ejaz.dewani.ly/ejaz/api/employees';
+        const response = await axios.get(apiUrl, {
+            headers: {
+                'apikey': apiKey,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+
+        // Extract data from the API response
+        const employees = response.data;
+
+        // Find the director by name and role containing "مدير"
+        const director = employees.find(emp => emp.nm === name && emp.b.includes('مدير'));
+
+        if (!director) {
+            return res.status(404).json({
+                success: false,
+                message: `No director found with name: ${name}`,
+            });
+        }
+
+        // Return the department
+        res.status(200).json({
+            success: true,
+            department: director.d,
+        });
+    } catch (error) {
+        console.error('Error fetching director department by name:', error);
+
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch director department',
+            error: error.message,
+        });
+    }
+};
+
+
+
+export const getDirectorByDepartment = async (req, res) => {
+    try {
+        // Extract the department name from the request parameters
+        const { department } = req.query;
+
+        if (!department) {
+            return res.status(400).json({
+                success: false,
+                message: 'Department name is required',
+            });
+        }
+
+        // Fetch data from the API
+        const apiUrl = 'https://ejaz.dewani.ly/ejaz/api/employees';
+        const response = await axios.get(apiUrl, {
+            headers: {
+                'apikey': apiKey,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+
+        // Extract data from the API response
+        const employees = response.data;
+
+        // Find the director of the specified department
+        const director = employees.find(
+            (employee) =>
+                employee.d === department && employee.b.includes('مدير')
+        );
+
+        if (!director) {
+            return res.status(404).json({
+                success: false,
+                message: `No director found for department: ${department}`,
+            });
+        }
+
+        // Return the director's information
+        res.status(200).json({
+            success: true,
+            director: {
+                rw: director.rw,
+                name: director.nm,
+                role: director.b,
+                department: director.d,
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching director by department:', error);
+
+        // Handle errors
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch director information',
+            error: error.message,
+        });
+    }
+};
+
+export const getEmployeeRwByName = async (req, res) => {
+    try {
+        const { name } = req.query;
+
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: 'Employee name is required.',
+            });
+        }
+
+        // Fetch employee data from the API
+        const apiUrl = 'https://ejaz.dewani.ly/ejaz/api/employees';
+        const response = await axios.get(apiUrl, {
+            headers: {
+                'apikey': process.env.API_KEY, // Use your API key if needed
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const employees = response.data;
+
+        // Find the employee by name
+        const employee = employees.find((emp) => emp.nm === name);
+
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: `Employee with name "${name}" not found.`,
+            });
+        }
+
+        // Return the employee reference (rw)
+        res.status(200).json({
+            success: true,
+            employee: {
+                name: employee.nm,
+                rw: employee.rw,
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching employee reference:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch employee reference.',
+            error: error.message,
+        });
+    }
+};

@@ -5,6 +5,12 @@ import {
      getStatJob,
      getDiplome,
      get_linked_department,
+     getAllDepartments,
+     getDirectorsByDepartment,
+     getDepartmentByEmployeeName,
+     getDirectorDepartmentByName,
+     getDirectorByDepartment,
+     getEmployeeRwByName,
 } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -22,6 +28,15 @@ router.get('/account-count-by-job', getStatJob);
 router.get('/account-count-by-diplome', getDiplome);
 
 router.get('/account-data-by-job-code', get_linked_department);
+
+router.get('/departments-list', getAllDepartments);
+router.get('/director-departements-list', getDirectorsByDepartment);
+router.get('/department-by-employee-name', getDepartmentByEmployeeName);
+router.get('/director-department-by-name', getDirectorDepartmentByName);
+router.get('/director-by-department', getDirectorByDepartment);
+router.get('/employee-rw-by-name', getEmployeeRwByName);
+
+
 
 
 

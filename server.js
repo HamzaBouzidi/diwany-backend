@@ -14,6 +14,8 @@ import reportRoutes from './routes/report.routes.js';
 import evaluationReportRoutes from './routes/evaluation-report.routes.js';
 import releasetRoutes from './routes/release.routes.js';
 import healthAssuranceRoutes from './routes/health-assurance.routes.js';
+import pledge from './routes/pledge.routes.js';
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -69,6 +71,8 @@ app.use('/api/', reportRoutes);
 app.use('/api/', evaluationReportRoutes);
 app.use('/api/', releasetRoutes);
 app.use('/api/', healthAssuranceRoutes);
+app.use('/api', pledge);
+
 
 
 
