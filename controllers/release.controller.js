@@ -56,3 +56,46 @@ export const getAllReleases = async (req, res) => {
   res.status(500).json({ message: 'Error fetching Release records', error });
  }
 };
+
+// Update release state
+export const updateReleaseState = async (req, res) => {
+ try {
+  const { id } = req.params; // Get release ID from the URL
+  const { state } = req.body; // Get new state from the request body
+
+  // Validate required fields
+  if (!state) {
+   return res.status(400).json({
+    success: false,
+    message: 'State is required.',
+   });
+  }
+
+  // Check if the release exists
+  const release = await Release.findByPk(id);
+  if (!release) {
+   return res.status(404).json({
+    success: false,
+    message: 'Release not found.',
+   });
+  }
+
+  // Update the release state
+  release.state = state;
+  await release.save();
+
+  // Respond with the updated release
+  res.status(200).json({
+   success: true,
+   message: 'Release state updated successfully.',
+   release,
+  });
+ } catch (error) {
+  console.error('Error updating release state:', error);
+  res.status(500).json({
+   success: false,
+   message: 'Failed to update release state.',
+   error: error.message,
+  });
+ }
+}

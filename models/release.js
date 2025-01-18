@@ -30,7 +30,7 @@ const Release = sequelize.define(
    allowNull: false,
   },
   state: {
-   type: DataTypes.ENUM('Pending', 'Approved', 'Declined'),
+   type: DataTypes.ENUM('Pending', 'Approved', 'Rejected'),
    allowNull: false,
    defaultValue: 'Pending', // Default state
   },
