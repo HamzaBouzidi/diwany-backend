@@ -1,11 +1,12 @@
 import express from 'express';
-import { addReport } from '../controllers/report.controller.js';
+import { addReport, getAllReports } from '../controllers/report.controller.js';
 
 const router = express.Router();
 
-router.post('/report/add', addReport);
+router.post('/working-period-report/add', addReport);
 
 
+router.get('/working-period-report/all', getAllReports);
 
 
 

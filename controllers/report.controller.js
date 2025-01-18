@@ -1,45 +1,49 @@
 import Report from '../models/report.js';
 
+
+
 export const addReport = async (req, res) => {
- const {
-  name,
-  jobTitle,
-  nationalNumber,
-  department,
-  startDate,
-  endDate
- } = req.body;
-
  try {
-  // Validate that required fields are present
-  if (!name || !jobTitle || !nationalNumber || !department || !startDate || !endDate) {
-   return res.status(400).json({ message: 'All required fields must be filled' });
-  }
+  const reportData = req.body; // Extract data from the request body
 
-  // Check if a report with the same nationalNumber already exists
-  const existingReport = await Report.findOne({ where: { nationalNumber } });
-  if (existingReport) {
-   return res.status(400).json({ message: 'A report with this national number already exists' });
-  }
+  // Create a new report in the database
+  const newReport = await Report.create(reportData);
 
-  // Create a new report
-  const newReport = await Report.create({
-   name,
-   jobTitle,
-   nationalNumber,
-   department,
-   startDate,
-   endDate
-  });
-
-  // Respond with the newly created report
-  return res.status(201).json({
+  res.status(201).json({
+   success: true,
    message: 'Report added successfully',
-   report: newReport
+   data: newReport,
   });
-
  } catch (error) {
   console.error('Error adding report:', error);
-  return res.status(500).json({ message: 'Internal server error', error: error.message });
+
+  res.status(500).json({
+   success: false,
+   message: 'Failed to add report',
+   error: error.message,
+  });
+ }
+};
+
+
+
+export const getAllReports = async (req, res) => {
+ try {
+  // Fetch all reports from the database
+  const reports = await Report.findAll();
+
+  res.status(200).json({
+   success: true,
+   message: 'Reports fetched successfully',
+   data: reports,
+  });
+ } catch (error) {
+  console.error('Error fetching reports:', error);
+
+  res.status(500).json({
+   success: false,
+   message: 'Failed to fetch reports',
+   error: error.message,
+  });
  }
 };

@@ -719,7 +719,6 @@ export const getDirectorByDepartment = async (req, res) => {
         });
     }
 };
-
 export const getEmployeeRwByName = async (req, res) => {
     try {
         const { name } = req.query;
@@ -731,11 +730,11 @@ export const getEmployeeRwByName = async (req, res) => {
             });
         }
 
-        // Fetch employee data from the API
+        // Fetch employee data from the external API
         const apiUrl = 'https://ejaz.dewani.ly/ejaz/api/employees';
         const response = await axios.get(apiUrl, {
             headers: {
-                'apikey': process.env.API_KEY, // Use your API key if needed
+                'apikey': process.env.API_KEY,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
@@ -743,8 +742,11 @@ export const getEmployeeRwByName = async (req, res) => {
 
         const employees = response.data;
 
-        // Find the employee by name
-        const employee = employees.find((emp) => emp.nm === name);
+        // Normalize and trim both input name and employee names to ensure accurate comparison
+        const normalizedName = name.normalize('NFC').trim();
+        const employee = employees.find((emp) =>
+            emp.nm?.normalize('NFC').trim() === normalizedName
+        );
 
         if (!employee) {
             return res.status(404).json({
@@ -753,7 +755,7 @@ export const getEmployeeRwByName = async (req, res) => {
             });
         }
 
-        // Return the employee reference (rw)
+        // Return the employee's `rw` value
         res.status(200).json({
             success: true,
             employee: {

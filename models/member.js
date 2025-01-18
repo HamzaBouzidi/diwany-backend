@@ -67,6 +67,11 @@ const Member = sequelize.define(
    type: DataTypes.TEXT,
    allowNull: true,
   },
+   isVisible: {
+     type: DataTypes.BOOLEAN,
+     defaultValue: false, // Hidden by default
+     allowNull: false,
+   },
  },
 
  {
