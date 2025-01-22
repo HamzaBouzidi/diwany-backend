@@ -1,5 +1,5 @@
 import express from 'express';
-import { addMorningDelay, getAllMorningDelays, getMorningDelaysByEmployee, getMorningDelaysByManager, validateMorningDelay, } from '../controllers/morningDelay.controller.js';
+import { addMorningDelay, getAllMorningDelays, getMorningDelayCountsByState, getMorningDelaysByEmployee, getMorningDelaysByManager, validateMorningDelay, } from '../controllers/morningDelay.controller.js';
 
 const router = express.Router();
 
@@ -17,6 +17,7 @@ router.put('/morning-delays/validate/:id', validateMorningDelay);
 router.get('/morning-delays', getAllMorningDelays);
 
 
+router.get('/morning-delays/morning-delay-counts', getMorningDelayCountsByState);
 
 
 

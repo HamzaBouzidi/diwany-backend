@@ -162,3 +162,36 @@ export const getAllMorningDelays = async (req, res) => {
   return res.status(500).json({ message: 'Internal server error' });
  }
 };
+
+// Function to get morning delay counts by approval status
+export const getMorningDelayCountsByState = async (req, res) => {
+ try {
+  const delays = await MorningDelay.findAll(); // Fetch all morning delays
+
+  // Initialize counters
+  let pendingCount = 0;
+  let refusedCount = 0;
+  let approvedCount = 0;
+
+  // Count by bossApprovalStatus
+  delays.forEach(delay => {
+   if (delay.bossApprovalStatus === 'Refused') {
+    refusedCount++;
+   } else if (delay.bossApprovalStatus === 'Approved') {
+    approvedCount++;
+   } else {
+    pendingCount++;
+   }
+  });
+
+  // Return the counts in JSON format
+  res.json({
+   pending: pendingCount,
+   refused: refusedCount,
+   approved: approvedCount,
+  });
+ } catch (error) {
+  console.error('Error fetching morning delays data:', error);
+  res.status(500).json({ error: 'Internal server error' });
+ }
+};

@@ -1,5 +1,5 @@
 import express from 'express';
-import { addExitAuthorisation, getAllExitAuthorizations, getExitAuthorizationsByEmployee, getExitAuthorizationsByManager, validateExitAuthorization } from '../controllers/exitAuthorization.controller.js';
+import { addExitAuthorisation, getAllExitAuthorizations, getExitAuthorizationsByEmployee, getExitAuthorizationsByManager, getExitCountsByState, validateExitAuthorization } from '../controllers/exitAuthorization.controller.js';
 
 const router = express.Router();
 
@@ -14,6 +14,7 @@ router.put('/exit-authorizations/validate/:id', validateExitAuthorization);
 
 router.get('/exit-authorizations', getAllExitAuthorizations);
 
+router.get('/exit-authorizations/exit-counts', getExitCountsByState);
 
 
 export default router;

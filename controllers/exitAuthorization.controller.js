@@ -172,3 +172,36 @@ export const getAllExitAuthorizations = async (req, res) => {
   return res.status(500).json({ message: 'Internal server error' });
  }
 };
+
+// Function to get exit authorization counts by approval status
+export const getExitCountsByState = async (req, res) => {
+ try {
+  const exits = await ExitAuthorization.findAll(); // Fetch all exit authorizations
+
+  // Initialize counters
+  let pendingCount = 0;
+  let refusedCount = 0;
+  let approvedCount = 0;
+
+  // Count by bossApprovalStatus
+  exits.forEach(exit => {
+   if (exit.bossApprovalStatus === 'Refused') {
+    refusedCount++;
+   } else if (exit.bossApprovalStatus === 'Approved') {
+    approvedCount++;
+   } else {
+    pendingCount++;
+   }
+  });
+
+  // Return the counts in JSON format
+  res.json({
+   pending: pendingCount,
+   refused: refusedCount,
+   approved: approvedCount,
+  });
+ } catch (error) {
+  console.error('Error fetching exit authorizations data:', error);
+  res.status(500).json({ error: 'Internal server error' });
+ }
+};
