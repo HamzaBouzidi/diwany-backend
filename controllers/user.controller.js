@@ -10,27 +10,25 @@ import https from 'https';
 const JWT_SECRET = process.env.JWT_SECRET;
 const apiKey = process.env.API_KEY;
 
-
-
 export const register = async (req, res) => {
-    const { user_name, user_email, password, user_ref_emp, user_phone } = req.body;
+    const { user_name, user_email, password, user_ref_emp, user_phone, permissions } = req.body;
     const apiKey = '19af628cfa6df1828317a6268bbc0ce8814815e28a4aa7f36068b5d0e23ca1e7';
 
     console.log('Incoming request data:', req.body);
 
+    // ✅ Validate required fields
     if (!user_name || !user_email || !password || !user_ref_emp) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
     try {
+        // ✅ Check if the user already exists
         const existingUser = await User.findOne({ where: { user_email } });
-        console.log('Existing user check result:', existingUser);
-
         if (existingUser) {
             return res.status(400).json({ message: 'Email is already registered' });
         }
 
-        // Call the external API and log the response
+        // ✅ Call external API to verify user_ref_emp
         const apiResponse = await axios.get('https://ejaz.dewani.ly/ejaz/api/employees', {
             headers: {
                 'apikey': apiKey,
@@ -40,29 +38,35 @@ export const register = async (req, res) => {
         });
 
         console.log('API response data:', JSON.stringify(apiResponse.data, null, 2));
+        const employees = apiResponse.data;
 
-        const employees = apiResponse.data; // Adjust this if necessary based on response structure
-
-        console.log('user_ref_emp:', user_ref_emp);
-        employees.forEach(emp => {
-            console.log('Comparing against employee rw:', emp.rw);
-        });
-
-        // Now comparing user_ref_emp to rw instead of no
+        // ✅ Compare `user_ref_emp` to `rw`
         const matchedEmployee = employees.find(
             (emp) => String(emp.rw).trim() === String(user_ref_emp).trim()
         );
-
-        console.log('Matched employee:', matchedEmployee);
 
         if (!matchedEmployee) {
             return res.status(400).json({ message: 'Reference employee not found' });
         }
 
-        // Hash the password asynchronously
+        // ✅ Hash the password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // ✅ Default permissions (all `0`)
+        const defaultPermissions = {
+            request_vacation: 0, view_vacation_list: 0,
+            request_exit_auth: 0, view_exit_auth_list: 0,
+            request_morning_delay: 0, view_morning_delay_list: 0,
+            request_nomination: 0, view_nomination_list: 0,
+            request_pledge: 0, view_pledge_list: 0,
+            request_release: 0, view_release_list: 0
+        };
+
+        // ✅ Merge default permissions with provided ones (if any)
+        const assignedPermissions = { ...defaultPermissions, ...permissions };
+
+        // ✅ Create new user with assigned permissions
         const newUser = await User.create({
             user_name,
             user_email,
@@ -70,6 +74,7 @@ export const register = async (req, res) => {
             user_ref_emp,
             user_phone,
             State: true,
+            ...assignedPermissions // ✅ Assign permissions dynamically
         });
 
         return res.status(201).json({ message: 'User registered successfully', newUser });
@@ -125,7 +130,8 @@ export const login = async (req, res) => {
                 ref_emp: user.user_ref_emp,
                 phone: user.user_phone,
                 state: user.State,
-                job: user.b
+                job: user.b,
+                vac: user.ras
             },
             JWT_SECRET,  // Use the secret from the .env file
             { expiresIn: '12h' }
@@ -156,16 +162,35 @@ export const login = async (req, res) => {
 // Function to get all users (for admin)
 export const getAllUsers = async (req, res) => {
     try {
-        // Fetch all users from the database
-        const users = await User.findAll({
-            attributes: ['USER_ID', 'user_name', 'user_email', 'State', 'user_job', 'user_role', 'user_ref_emp']  // Select only the fields you want to return
-        });
+        // Fetch all users without specifying attributes (returns all fields)
+        const users = await User.findAll();
 
-        // Return the users in the response
         res.status(200).json(users);
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).json({ message: 'Error fetching users' });
+    }
+};
+
+
+// Function to delete a user by ID
+export const deleteUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Find the user
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Delete the user
+        await user.destroy();
+
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ message: 'Error deleting user' });
     }
 };
 
@@ -270,9 +295,49 @@ export const getUserInfo = async (req, res) => {
     }
 };
 
+/*
+ export const getDistinctCountAgeALLEmployee = async (req, res) => {
+
+        try {
+            // Make the API call to get the list of employees
+            const apiResponse = await axios.get('https://ejaz.dewani.ly/ejaz/api/employees', {
+                headers: {
+                    'apikey': apiKey,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            });
+
+
+
+            // Find the user with the matching user_ref_emp
+            const user = apiResponse.data;
+
+            const dataMap = {};
+            user.forEach(item => {
+
+                dataMap[item.age] = 'Age';
+
+            });
+            const newTournament = Object.keys(dataMap);
+
+            if (!newTournament) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // Send back the user data as a response
+            res.status(200).json(newTournament);
+        } catch (error) {
+            // Handle errors
+            res.status(500).json({ message: 'Error retrieving user information', error: error.message });
+        }
+
+    };
+
+*/
+
 
 export const getDistinctCountAgeALLEmployee = async (req, res) => {
-
     try {
         // Make the API call to get the list of employees
         const apiResponse = await axios.get('https://ejaz.dewani.ly/ejaz/api/employees', {
@@ -283,31 +348,36 @@ export const getDistinctCountAgeALLEmployee = async (req, res) => {
             },
         });
 
+        const employees = apiResponse.data;
 
-
-        // Find the user with the matching user_ref_emp
-        const user = apiResponse.data;
-
-        const dataMap = {};
-        user.forEach(item => {
-
-            dataMap[item.age] = 'Age';
-
+        // ✅ Count the number of employees per age
+        const ageCounts = {};
+        employees.forEach((employee) => {
+            const age = employee.age;
+            if (ageCounts[age]) {
+                ageCounts[age] += 1;
+            } else {
+                ageCounts[age] = 1;
+            }
         });
-        const newTournament = Object.keys(dataMap);
 
-        if (!newTournament) {
-            return res.status(404).json({ message: 'User not found' });
+        // ✅ Ensure age 70 is included in the dataset
+        if (!ageCounts[70]) {
+            ageCounts[70] = 0;
         }
 
-        // Send back the user data as a response
-        res.status(200).json(newTournament);
+        // ✅ Convert data into an array of objects and sort by age
+        const sortedAges = Object.entries(ageCounts)
+            .map(([age, count]) => ({ age: Number(age), count }))
+            .sort((a, b) => a.age - b.age);
+
+        // ✅ Return the sorted age distribution
+        res.status(200).json(sortedAges);
     } catch (error) {
-        // Handle errors
         res.status(500).json({ message: 'Error retrieving user information', error: error.message });
     }
-
 };
+
 
 
 

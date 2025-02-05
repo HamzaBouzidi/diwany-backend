@@ -11,6 +11,7 @@ import {
      getDirectorDepartmentByName,
      getDirectorByDepartment,
      getEmployeeRwByName,
+     deleteUser,
 } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -36,6 +37,8 @@ router.get('/director-department-by-name', getDirectorDepartmentByName);
 router.get('/director-by-department', getDirectorByDepartment);
 router.get('/employee-rw-by-name', getEmployeeRwByName);
 
+
+router.delete('/delete-user/:userId', deleteUser);
 
 
 
