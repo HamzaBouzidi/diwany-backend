@@ -60,7 +60,10 @@ export const register = async (req, res) => {
             request_morning_delay: 0, view_morning_delay_list: 0,
             request_nomination: 0, view_nomination_list: 0,
             request_pledge: 0, view_pledge_list: 0,
-            request_release: 0, view_release_list: 0
+            request_release: 0, view_release_list: 0,
+            request_cin: 0, view_cin_list: 0,
+            request_health_assurance: 0, view_health_assurance_list: 0,
+            request_reports: 0, view_reports: 0
         };
 
         // ✅ Merge default permissions with provided ones (if any)
@@ -158,6 +161,27 @@ export const login = async (req, res) => {
     }
 };
 
+
+export const updateUserPermissions = async (req, res) => {
+    try {
+        const { userId } = req.params; // Extract user ID from request parameters
+        const updatedPermissions = req.body; // Extract permissions from request body
+
+        // ✅ Check if user exists
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'المستخدم غير موجود' });
+        }
+
+        // ✅ Update the user with new permissions
+        await user.update(updatedPermissions);
+
+        return res.status(200).json({ message: 'تم تحديث صلاحيات المستخدم بنجاح ✅', updatedPermissions });
+    } catch (error) {
+        console.error('❌ Error updating user permissions:', error);
+        return res.status(500).json({ message: 'فشل تحديث الصلاحيات ❌' });
+    }
+};
 
 // Function to get all users (for admin)
 export const getAllUsers = async (req, res) => {
@@ -840,5 +864,63 @@ export const getEmployeeRwByName = async (req, res) => {
             message: 'Failed to fetch employee reference.',
             error: error.message,
         });
+    }
+};
+
+
+
+export const getDirectorRw = async (req, res) => {
+    const { employeeId } = req.params;
+    const url = `https://ejaz.dewani.ly/ejaz/api/employees/${employeeId}/manager`;
+
+    try {
+        const response = await axios.get(url, {
+            headers: {
+                'apikey': apiKey,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return res.status(200).json({ rw: response.data.rw });
+    } catch (error) {
+        console.error('Error fetching director RW:', error.response ? error.response.data : error.message);
+        return res.status(500).json({
+            message: 'Failed to fetch director RW.',
+            error: error.response ? error.response.data : error.message,
+        });
+    }
+};
+
+
+export const getUserAuthorizations = async (req, res) => {
+    const { user_ref_emp } = req.params;
+
+    try {
+        // Find user by reference ID
+        const user = await User.findOne({
+            where: { user_ref_emp },
+            attributes: [
+                'request_vacation', 'view_vacation_list',
+                'request_exit_auth', 'view_exit_auth_list',
+                'request_morning_delay', 'view_morning_delay_list',
+                'request_nomination', 'view_nomination_list',
+                'request_pledge', 'view_pledge_list',
+                'request_release', 'view_release_list',
+                'request_cin', 'view_cin_list',
+                'request_health_assurance', 'view_health_assurance_list',
+                'request_reports', 'view_reports',
+
+            ]
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        return res.status(200).json({ permissions: user });
+    } catch (error) {
+        console.error('Error fetching user authorizations:', error);
+        return res.status(500).json({ message: 'Error fetching user authorizations' });
     }
 };

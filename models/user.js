@@ -58,7 +58,23 @@ const User = sequelize.define(
 
   // ✅ Release Permissions
   request_release: { type: DataTypes.BOOLEAN, defaultValue: 0 },
-  view_release_list: { type: DataTypes.BOOLEAN, defaultValue: 0 }
+  view_release_list: { type: DataTypes.BOOLEAN, defaultValue: 0 },
+
+  // ✅ CIN (Carte d'Identité Nationale) Permissions 
+  request_cin: { type: DataTypes.BOOLEAN, defaultValue: 0 },
+  view_cin_list: { type: DataTypes.BOOLEAN, defaultValue: 0 },
+
+
+  // ✅ Health Assurance Permissions
+  request_health_assurance: { type: DataTypes.BOOLEAN, defaultValue: 0 },
+  view_health_assurance_list: { type: DataTypes.BOOLEAN, defaultValue: 0 },
+
+
+  // ✅ Reports Permissions
+  request_reports: { type: DataTypes.BOOLEAN, defaultValue: 0 },
+  view_reports: { type: DataTypes.BOOLEAN, defaultValue: 0 }
+
+
  },
  {
   freezeTableName: true,

@@ -18,6 +18,8 @@ import pledge from './routes/pledge.routes.js';
 import nominationFormVisibilityRoutes from './routes/nominationFormVisibility.routes.js'
 import path from 'path';
 import { fileURLToPath } from 'url';
+import notificationRoutes from './routes/notification.routes.js';
+
 
 
 
@@ -75,6 +77,8 @@ app.use('/api/', releasetRoutes);
 app.use('/api/', healthAssuranceRoutes);
 app.use('/api', pledge);
 app.use('/api', nominationFormVisibilityRoutes);
+app.use('/api', notificationRoutes);
+
 
 
 

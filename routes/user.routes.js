@@ -12,6 +12,9 @@ import {
      getDirectorByDepartment,
      getEmployeeRwByName,
      deleteUser,
+     getDirectorRw,
+     getUserAuthorizations,
+     updateUserPermissions,
 } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -36,6 +39,12 @@ router.get('/department-by-employee-name', getDepartmentByEmployeeName);
 router.get('/director-department-by-name', getDirectorDepartmentByName);
 router.get('/director-by-department', getDirectorByDepartment);
 router.get('/employee-rw-by-name', getEmployeeRwByName);
+router.get('/director-rw/:employeeId', getDirectorRw);
+// ✅ Route to get a user's authorizations
+router.get('/user-authorizations/:user_ref_emp', getUserAuthorizations);
+
+
+router.put('/users/:userId/permissions', updateUserPermissions);
 
 
 router.delete('/delete-user/:userId', deleteUser);
